@@ -1,28 +1,262 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <main v-touch:swipe.bottom="fetchWeatherData">
+      <div class="search-box">
+        <input
+          id="searchBar"
+          type="text"
+          class="search-bar"
+          placeholder="Search..."
+          @keypress.enter="fetchWeatherData"
+        />
+      </div>
+      <div class="weather-wrap" v-if="typeof weather.main != 'undefined'">
+        <div class="location-box">
+          <div class="location">
+            {{ weather.name }}, {{ weather.sys.country }}
+          </div>
+          <div class="date">{{ dateBuilder() }}</div>
+        </div>
+        <div class="weather-box">
+          <div class="temp">{{ Math.round(weather.main.temp) }}°c</div>
+          <div class="weather">{{ weather.weather[0].description }}</div>
+        </div>
+      </div>
+      <div v-else>
+        <h1 class="error-message" id="errorMessage">
+          Ort konnte nicht gefunden werden!
+        </h1>
+      </div>
+    </main>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  name: "App",
+  data: () => ({
+    api_key: process.env.VUE_APP_API_KEY,
+    api_base: "https://api.openweathermap.org/data/2.5/weather?q=",
+    weather: {},
+    test: false,
+  }),
+  methods: {
+    // fetching the weather data for the location the user put in the search bar
+    fetchWeatherData() {
+      let query = document.getElementById("searchBar").value;
+      fetch(
+        `${this.api_base}${query}&units=metric&lang=de&APPID=${this.api_key}`
+      )
+        .then((res) => {
+          return res.json();
+        })
+        .then(this.setResults); // calling the function
+    },
+    setResults(results) {
+      let searchBar = document.getElementById("searchBar");
+      this.weather = results; // setting the value of the weather object to the date we get from the api
+      if (searchBar.value === "") {
+        this.startingLocation();
+      } 
+        searchBar.value = this.weather.name;
+        this.changeBGImage();      
+    },
+    changeBGImage() {
+      let temp = this.weather.main.temp;
+      let element = document.getElementById("app").classList;
+      if (temp < 5) {
+        element.remove("warm");
+        element.add("cold");
+      } else if (temp > 20) {
+        element.remove("cold");
+        element.add("warm");
+      } else {
+        element.remove("cold", "warm");
+      }
+    },
+    dateBuilder() {
+      let d = new Date();
+      let months = [
+        "Januar",
+        "Februar",
+        "März",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Dezember",
+      ];
+      let days = [
+        "Sonntag",
+        "Montag",
+        "Dienstag",
+        "Mittwoch",
+        "Donnerstag",
+        "Freitag",
+        "Samstag",
+      ];
+
+      let day = days[d.getDay()]; // getting the day with the index from the day array
+      let date = d.getDate();
+      let month = months[d.getMonth()]; // getting the month with the index of the months array
+      let year = d.getFullYear();
+
+      return `${day} ${date} ${month} ${year}`;
+    },
+    startingLocation() {
+      if (window.navigator.geolocation) {
+        window.navigator.geolocation.getCurrentPosition(this.showPosition);
+      }
+    },
+    showPosition(position) {
+      fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}&units=metric&lang=de&APPID=${this.api_key}`
+      )
+        .then((res) => {
+          return res.json();
+        })
+        .then(this.setResults); // calling the function
+    },
+  },
+  created() {
+    this.startingLocation();
+  },
+};
 </script>
 
 <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "montserrat", sans-serif;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-image: url("./assets/default-bg.jpg");
+  background-size: cover;
+  background-position: bottom;
+  transition: 0.4s;
+}
+
+#app.cold {
+  background-image: url("./assets/cold-bg.jpg");
+}
+
+#app.warm {
+  background-image: url("./assets/warm-bg.jpg");
+}
+
+main {
+  height: 100vh;
+  padding: 25px;
+  background-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.25),
+    rgba(0, 0, 0, 0.75)
+  );
+}
+
+@media screen and (min-width: 480px) {
+  body {
+    height: 100vh;
+    background: linear-gradient(to bottom, #2c3e50, #bdc3c7);
+  }
+
+  #app {
+    max-width: 600px;
+    margin: auto;
+  }
+  main {
+    padding: 25px;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.25),
+      rgba(0, 0, 0, 0.75)
+    );
+  }
+}
+
+.error-message {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-style: italic;
+  text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+.search-box {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.search-box .search-bar {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  color: #313131;
+  font-size: 20px;
+  appearance: none;
+  border: none;
+  outline: none;
+  background: none;
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.3);
+
+  transition: 0.4s;
+}
+
+.search-box .search-bar:focus {
+  box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 5px 5px 5px 5px;
+}
+
+.location-box .location {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 500;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  text-shadow: 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.location-box .date {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 300;
+  font-style: italic;
+  text-align: center;
+}
+
+.weather-box {
+  text-align: center;
+}
+
+.weather-box .temp {
+  display: inline-block;
+  padding: 10px 25px;
+  color: #fff;
+  font-size: 6rem;
+  font-weight: 900;
+  text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  margin: 30px 0px;
+  box-shadow: 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+.weather-box .weather {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-style: italic;
+  text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
 }
 </style>

@@ -58,7 +58,7 @@ export default {
       if (searchBar.value === "") {
         this.startingLocation();
       } 
-        searchBar.value = this.weather.name;
+        searchBar.value = this.weather.name ?? '';
         this.changeBGImage();      
     },
     changeBGImage() {

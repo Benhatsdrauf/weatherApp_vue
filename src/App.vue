@@ -56,9 +56,9 @@ export default {
         this.startingLocation();
       }
     },
-    async setResults(results) {
+    setResults(results) {
       let searchBar = document.getElementById("searchBar");
-      this.weather = await results; // setting the value of the weather object to the date we get from the api
+      this.weather = results; // setting the value of the weather object to the date we get from the api
       searchBar.value = this.weather.name ?? "";
       this.changeBGImage();
     },
@@ -66,14 +66,17 @@ export default {
       if(typeof(this.weather.main) != 'undefined' ){      
       let temp = this.weather.main.temp;
       let element = document.getElementById("app").classList;
-        if (temp < 5) {
-          element.remove("warm");
+        if (temp < 0) {
+          element.remove(...element);
           element.add("cold");
-        } else if (temp > 20) {
-          element.remove("cold");
+        } else if (temp > 15 && temp <= 25) {
+          element.remove(...element);
           element.add("warm");
+        } else if(temp > 25){
+          element.remove(...element);
+          element.add('hot')
         } else {
-          element.remove("cold", "warm");
+          element.remove(...element);
         }
         }
     },
@@ -146,7 +149,7 @@ body {
   background-image: url("./assets/default-bg.jpg");
   background-size: cover;
   background-position: bottom;
-  transition: 0.4s;
+  transition: ease-in-out 1.5s;
 }
 
 #app.cold {
@@ -155,6 +158,10 @@ body {
 
 #app.warm {
   background-image: url("./assets/warm-bg.jpg");
+}
+
+#app.hot {
+  background-image: url("./assets/hot-bg.jpg");
 }
 
 main {

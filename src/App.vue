@@ -38,41 +38,44 @@ export default {
     api_key: process.env.VUE_APP_API_KEY,
     api_base: "https://api.openweathermap.org/data/2.5/weather?q=",
     weather: {},
-    test: false,
+    // coords = {},
   }),
   methods: {
     // fetching the weather data for the location the user put in the search bar
     fetchWeatherData() {
       let query = document.getElementById("searchBar").value;
-      fetch(
+      if(query != '') {
+              fetch(
         `${this.api_base}${query}&units=metric&lang=de&APPID=${this.api_key}`
       )
         .then((res) => {
           return res.json();
         })
         .then(this.setResults); // calling the function
-    },
-    setResults(results) {
-      let searchBar = document.getElementById("searchBar");
-      this.weather = results; // setting the value of the weather object to the date we get from the api
-      if (searchBar.value === "") {
+      } else {
         this.startingLocation();
-      } 
-        searchBar.value = this.weather.name ?? '';
-        this.changeBGImage();      
+      }
+    },
+    async setResults(results) {
+      let searchBar = document.getElementById("searchBar");
+      this.weather = await results; // setting the value of the weather object to the date we get from the api
+      searchBar.value = this.weather.name ?? "";
+      this.changeBGImage();
     },
     changeBGImage() {
+      if(typeof(this.weather.main) != 'undefined' ){      
       let temp = this.weather.main.temp;
       let element = document.getElementById("app").classList;
-      if (temp < 5) {
-        element.remove("warm");
-        element.add("cold");
-      } else if (temp > 20) {
-        element.remove("cold");
-        element.add("warm");
-      } else {
-        element.remove("cold", "warm");
-      }
+        if (temp < 5) {
+          element.remove("warm");
+          element.add("cold");
+        } else if (temp > 20) {
+          element.remove("cold");
+          element.add("warm");
+        } else {
+          element.remove("cold", "warm");
+        }
+        }
     },
     dateBuilder() {
       let d = new Date();

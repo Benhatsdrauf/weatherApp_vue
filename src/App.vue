@@ -3,6 +3,7 @@
     <main v-touch:swipe.bottom="fetchWeatherData">
       <div class="search-box">
         <input
+          autocomplete="off"
           id="searchBar"
           type="text"
           class="search-bar"

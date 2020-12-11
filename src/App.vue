@@ -33,7 +33,7 @@
             v-for="day in weatherData.daily"
             v-bind:key="day.dt"
           >
-            <p class="item-left">{{ day.dt }}</p>
+            <p class="item-left">{{ day.weather[1] }}</p>
             <p class="item-right">
               {{ Math.round(day.temp.min) }}°c/{{ Math.round(day.temp.max) }}°c
             </p>
@@ -77,6 +77,7 @@ export default {
       let searchBar = document.getElementById("searchBar");
       this.weatherData = results; // setting the value of the weather object to the date we get from the api
       this.weatherData.daily.splice(5, 7);
+      this.getDayOfTheWeek();
       console.log(this.weatherData);
       searchBar.value = this.weatherData.name ?? "";
       this.changeBGImage();
@@ -145,6 +146,13 @@ export default {
           return res.json();
         })
         .then(this.setResults); // calling the function
+    },
+    getDayOfTheWeek(){
+      let timestamp = 1607796000;
+      let a = new Date(timestamp * 1000);
+      let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      let dayOfWeek = days[a.getDay()]
+      this.weatherData.daily[0].weather.push(dayOfWeek);
     },
   },
   created() {

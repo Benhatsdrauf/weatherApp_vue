@@ -22,6 +22,28 @@
           <div class="temp">{{ Math.round(weather.main.temp) }}°c</div>
           <div class="weather">{{ weather.weather[0].description }}</div>
         </div>
+        <div class="forcast-wrap">
+          <div class="forcast-row">
+            <p class="item-left">Donnerstag</p>
+            <p class="item-right">-5/5°c</p>
+          </div>
+          <div class="forcast-row">
+            <p class="item-left">tag</p>
+            <p class="item-right">temp</p>
+          </div>
+          <div class="forcast-row">
+            <p class="item-left">tag</p>
+            <p class="item-right">temp</p>
+          </div>
+          <div class="forcast-row">
+            <p class="item-left">tag</p>
+            <p class="item-right">temp</p>
+          </div>
+          <div class="forcast-row">
+            <p class="item-left">tag</p>
+            <p class="item-right">temp</p>
+          </div>
+        </div>
       </div>
       <div v-else>
         <h1 class="error-message" id="errorMessage">
@@ -175,26 +197,6 @@ main {
   );
 }
 
-@media screen and (min-width: 480px) {
-  body {
-    height: 100vh;
-    background: linear-gradient(to bottom, #2c3e50, #bdc3c7);
-  }
-
-  #app {
-    max-width: 600px;
-    margin: auto;
-  }
-  main {
-    padding: 25px;
-    background-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.25),
-      rgba(0, 0, 0, 0.75)
-    );
-  }
-}
-
 .error-message {
   color: #fff;
   font-size: 1.5rem;
@@ -205,7 +207,7 @@ main {
 
 .search-box {
   width: 100%;
-  margin-bottom: 30px;
+  margin-bottom: 1rem;
 }
 
 .search-box .search-bar {
@@ -213,14 +215,13 @@ main {
   width: 100%;
   padding: 15px;
   color: #313131;
-  font-size: 20px;
+  font-size: 1rem;
   appearance: none;
   border: none;
   outline: none;
   background: none;
   box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25);
   background-color: rgba(255, 255, 255, 0.3);
-
   transition: 0.4s;
 }
 
@@ -232,7 +233,7 @@ main {
 
 .location-box .location {
   color: #fff;
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 500;
   text-align: center;
   text-shadow: 1px 3px rgba(0, 0, 0, 0.25);
@@ -254,7 +255,7 @@ main {
   display: inline-block;
   padding: 10px 25px;
   color: #fff;
-  font-size: 6rem;
+  font-size: 5rem;
   font-weight: 900;
   text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
   background-color: rgba(255, 255, 255, 0.25);
@@ -270,4 +271,45 @@ main {
   font-style: italic;
   text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
 }
+
+.forcast-wrap {
+  font-size: 1.2rem;
+  text-shadow: 3px 6px rgba(0, 0, 0, 0.25);
+  margin-top: 1rem;
+  display: grid;
+  color: #fff;
+}
+
+.forcast-row {
+  margin: 1.2rem 10px;
+}
+
+.item-left {
+  float: left;
+}
+
+.item-right {
+  float: right;
+}
+
+@media screen and (min-width: 480px) {
+  body {
+    height: 100vh;
+    background: linear-gradient(to bottom, #2c3e50, #bdc3c7);
+  }
+
+  #app {
+    max-width: 600px;
+    margin: auto;
+  }
+  main {
+    padding: 25px;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.25),
+      rgba(0, 0, 0, 0.75)
+    );
+  }
+}
+
 </style>

@@ -11,37 +11,32 @@
           @keypress.enter="fetchWeatherData"
         />
       </div>
-      <div class="weather-wrap" v-if="typeof weather.main != 'undefined'">
+      <div
+        class="weather-wrap"
+        v-if="typeof weatherData.current != 'undefined'"
+      >
         <div class="location-box">
           <div class="location">
-            {{ weather.name }}, {{ weather.sys.country }}
+            {{ weatherData.timezone }}
           </div>
           <div class="date">{{ dateBuilder() }}</div>
         </div>
         <div class="weather-box">
-          <div class="temp">{{ Math.round(weather.main.temp) }}°c</div>
-          <div class="weather">{{ weather.weather[0].description }}</div>
+          <div class="temp">{{ Math.round(weatherData.current.temp) }}°c</div>
+          <div class="weather">
+            {{ weatherData.current.weather[0].description }}
+          </div>
         </div>
         <div class="forcast-wrap">
-          <div class="forcast-row">
-            <p class="item-left">Donnerstag</p>
-            <p class="item-right">-5/5°c</p>
-          </div>
-          <div class="forcast-row">
-            <p class="item-left">tag</p>
-            <p class="item-right">temp</p>
-          </div>
-          <div class="forcast-row">
-            <p class="item-left">tag</p>
-            <p class="item-right">temp</p>
-          </div>
-          <div class="forcast-row">
-            <p class="item-left">tag</p>
-            <p class="item-right">temp</p>
-          </div>
-          <div class="forcast-row">
-            <p class="item-left">tag</p>
-            <p class="item-right">temp</p>
+          <div
+            class="forcast-row"
+            v-for="day in weatherData.daily"
+            v-bind:key="day.dt"
+          >
+            <p class="item-left">{{ day.dt }}</p>
+            <p class="item-right">
+              {{ Math.round(day.temp.min) }}°c/{{ Math.round(day.temp.max) }}°c
+            </p>
           </div>
         </div>
       </div>
@@ -60,15 +55,14 @@ export default {
   data: () => ({
     api_key: process.env.VUE_APP_API_KEY,
     api_base: "https://api.openweathermap.org/data/2.5/weather?q=",
-    weather: {},
-    // coords = {},
+    weatherData: {},
   }),
   methods: {
     // fetching the weather data for the location the user put in the search bar
     fetchWeatherData() {
       let query = document.getElementById("searchBar").value;
       if(query != '') {
-              fetch(
+        fetch(
         `${this.api_base}${query}&units=metric&lang=de&APPID=${this.api_key}`
       )
         .then((res) => {
@@ -81,13 +75,15 @@ export default {
     },
     setResults(results) {
       let searchBar = document.getElementById("searchBar");
-      this.weather = results; // setting the value of the weather object to the date we get from the api
-      searchBar.value = this.weather.name ?? "";
+      this.weatherData = results; // setting the value of the weather object to the date we get from the api
+      this.weatherData.daily.splice(5, 7);
+      console.log(this.weatherData);
+      searchBar.value = this.weatherData.name ?? "";
       this.changeBGImage();
     },
     changeBGImage() {
-      if(typeof(this.weather.main) != 'undefined' ){      
-      let temp = this.weather.main.temp;
+      if(typeof(this.weatherData.main) != 'undefined' ){      
+      let temp = this.weatherData.main.temp;
       let element = document.getElementById("app").classList;
         if (temp < 0) {
           element.remove(...element);
@@ -143,7 +139,7 @@ export default {
     },
     showPosition(position) {
       fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}&units=metric&lang=de&APPID=${this.api_key}`
+        `https://api.openweathermap.org/data/2.5/onecall?lat=${position.coords.latitude}&lon=${position.coords.longitude}&exclude=hourly,minutely,hourly,alerts&lang=de&units=metric&appid=${this.api_key}`
       )
         .then((res) => {
           return res.json();

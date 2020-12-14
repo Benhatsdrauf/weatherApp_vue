@@ -90,7 +90,6 @@ export default {
       let searchBar = document.getElementById("searchBar");
       this.weatherData = results; // setting the value of the weather object to the date we get from the api
       this.weatherData.daily.splice(5, 7);
-      console.log(this.weatherData);
       this.getDayOfTheWeek();
       searchBar.value = this.weatherData.name ?? "";
       this.changeBGImage();

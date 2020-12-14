@@ -8,7 +8,7 @@
           type="text"
           class="search-bar"
           placeholder="Search..."
-          @keypress.enter="testName"
+          @keypress.enter="getLocationData"
         />
       </div>
       <div
@@ -60,37 +60,37 @@ export default {
     locationData: {},
   }),
   methods: {
-    testName() {
+    getLocationData() {
       let location = document.getElementById("searchBar").value;
         fetch(`http://api.positionstack.com/v1/forward?access_key=${this.geo_key}&query=${location}`)
           .then((res) => {
             return res.json();
           })
-          .then(this.showGeo);
+          .then(this.setLocationData);
     },
-    showGeo(res) {
+    setLocationData(res) {
       this.locationData = res.data[0];
       this.fetchWeatherData();
     },
     // fetching the weather data for the location the user put in the search bar
     fetchWeatherData() {
-      let query = document.getElementById("searchBar").value;
-      if (query != "") {
+      if (this.locationData != "") {
         fetch(
           `https://api.openweathermap.org/data/2.5/onecall?lat=${this.locationData.latitude}&lon=${this.locationData.longitude}&exclude=hourly,minutely,alerts&lang=de&units=metric&appid=${this.api_key}`
         )
           .then((res) => {
             return res.json();
           })
-          .then(this.setResults); // calling the function
+          .then(this.setWeatherData); // calling the function
       } else {
         this.startingLocation();
       }
     },
-    setResults(results) {
+    setWeatherData(results) {
       let searchBar = document.getElementById("searchBar");
       this.weatherData = results; // setting the value of the weather object to the date we get from the api
       this.weatherData.daily.splice(5, 7);
+      console.log(this.weatherData);
       this.getDayOfTheWeek();
       searchBar.value = this.weatherData.name ?? "";
       this.changeBGImage();
@@ -114,7 +114,8 @@ export default {
       }
     },
     dateBuilder() {
-      let d = new Date();
+      let timestemp = this.weatherData.current.dt;
+      let d = new Date(timestemp * 1000);
       let months = [
         "Januar",
         "Februar",
@@ -148,17 +149,17 @@ export default {
     },
     startingLocation() {
       if (window.navigator.geolocation) {
-        window.navigator.geolocation.getCurrentPosition(this.showPosition);
+        window.navigator.geolocation.getCurrentPosition(this.startingWeather);
       }
     },
-    showPosition(position) {
+    startingWeather(position) {
       fetch(
         `https://api.openweathermap.org/data/2.5/onecall?lat=${position.coords.latitude}&lon=${position.coords.longitude}&exclude=hourly,minutely,alerts&lang=de&units=metric&appid=${this.api_key}`
       )
         .then((res) => {
           return res.json();
         })
-        .then(this.setResults); // calling the function
+        .then(this.setWeatherData); // calling the function
     },
     getDayOfTheWeek() {
       if (this.weatherData) {
@@ -176,7 +177,11 @@ export default {
           "Samstag",
         ];
         let dayOfWeek = days[a.getDay()];
-        this.weatherData.daily[i].weather.push(dayOfWeek);
+        if(i == 0){
+          this.weatherData.daily[i].weather.push('Heute');
+        } else {
+          this.weatherData.daily[i].weather.push(dayOfWeek);
+        }        
         i += 1;
         });
       }

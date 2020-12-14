@@ -8,7 +8,7 @@
           type="text"
           class="search-bar"
           placeholder="Search..."
-          @keypress.enter="fetchWeatherData"
+          @keypress.enter="testName"
         />
       </div>
       <div
@@ -17,7 +17,7 @@
       >
         <div class="location-box">
           <div class="location">
-            {{ weatherData.timezone }}
+            {{ locationData.name }}
           </div>
           <div class="date">{{ dateBuilder() }}</div>
         </div>
@@ -54,21 +54,35 @@ export default {
   name: "App",
   data: () => ({
     api_key: process.env.VUE_APP_API_KEY,
+    geo_key: process.env.VUE_APP_WTF,
     api_base: "https://api.openweathermap.org/data/2.5/weather?q=",
     weatherData: {},
+    locationData: {},
   }),
   methods: {
+    testName() {
+      let location = document.getElementById("searchBar").value;
+        fetch(`http://api.positionstack.com/v1/forward?access_key=${this.geo_key}&query=${location}`)
+          .then((res) => {
+            return res.json();
+          })
+          .then(this.showGeo);
+    },
+    showGeo(res) {
+      this.locationData = res.data[0];
+      this.fetchWeatherData();
+    },
     // fetching the weather data for the location the user put in the search bar
     fetchWeatherData() {
       let query = document.getElementById("searchBar").value;
-      if(query != '') {
+      if (query != "") {
         fetch(
-        `${this.api_base}${query}&units=metric&lang=de&APPID=${this.api_key}`
-      )
-        .then((res) => {
-          return res.json();
-        })
-        .then(this.setResults); // calling the function
+          `https://api.openweathermap.org/data/2.5/onecall?lat=${this.locationData.latitude}&lon=${this.locationData.longitude}&exclude=hourly,minutely,alerts&lang=de&units=metric&appid=${this.api_key}`
+        )
+          .then((res) => {
+            return res.json();
+          })
+          .then(this.setResults); // calling the function
       } else {
         this.startingLocation();
       }
@@ -78,27 +92,26 @@ export default {
       this.weatherData = results; // setting the value of the weather object to the date we get from the api
       this.weatherData.daily.splice(5, 7);
       this.getDayOfTheWeek();
-      console.log(this.weatherData);
       searchBar.value = this.weatherData.name ?? "";
       this.changeBGImage();
     },
     changeBGImage() {
-      if(typeof(this.weatherData.main) != 'undefined' ){      
-      let temp = this.weatherData.main.temp;
-      let element = document.getElementById("app").classList;
+      if (typeof this.weatherData.current != "undefined") {
+        let temp = this.weatherData.current.temp;
+        let element = document.getElementById("app").classList;
         if (temp < 0) {
           element.remove(...element);
           element.add("cold");
         } else if (temp > 15 && temp <= 25) {
           element.remove(...element);
           element.add("warm");
-        } else if(temp > 25){
+        } else if (temp > 25) {
           element.remove(...element);
-          element.add('hot')
+          element.add("hot");
         } else {
           element.remove(...element);
         }
-        }
+      }
     },
     dateBuilder() {
       let d = new Date();
@@ -140,19 +153,33 @@ export default {
     },
     showPosition(position) {
       fetch(
-        `https://api.openweathermap.org/data/2.5/onecall?lat=${position.coords.latitude}&lon=${position.coords.longitude}&exclude=hourly,minutely,hourly,alerts&lang=de&units=metric&appid=${this.api_key}`
+        `https://api.openweathermap.org/data/2.5/onecall?lat=${position.coords.latitude}&lon=${position.coords.longitude}&exclude=hourly,minutely,alerts&lang=de&units=metric&appid=${this.api_key}`
       )
         .then((res) => {
           return res.json();
         })
         .then(this.setResults); // calling the function
     },
-    getDayOfTheWeek(){
-      let timestamp = 1607796000;
-      let a = new Date(timestamp * 1000);
-      let days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      let dayOfWeek = days[a.getDay()]
-      this.weatherData.daily[0].weather.push(dayOfWeek);
+    getDayOfTheWeek() {
+      if (this.weatherData) {
+        let i = 0;
+        this.weatherData.daily.forEach(day => {
+        let timestamp = day.dt;
+        let a = new Date(timestamp * 1000);
+        let days = [
+          "Sonntag",
+          "Montag",
+          "Dienstag",
+          "Mittwoch",
+          "Donnerstag",
+          "Freitag",
+          "Samstag",
+        ];
+        let dayOfWeek = days[a.getDay()];
+        this.weatherData.daily[i].weather.push(dayOfWeek);
+        i += 1;
+        });
+      }
     },
   },
   created() {
@@ -315,5 +342,4 @@ main {
     );
   }
 }
-
 </style>

@@ -27,10 +27,10 @@
             {{ currentWeather.weather[0].description }}
           </div>
         </div>
-        <!-- <div class="forcast-wrap">
+        <div class="forcast-wrap">
           <div
             class="forcast-row"
-            v-for="day in weatherData.daily"
+            v-for="day in forcastWeather.daily"
             v-bind:key="day.dt"
           >
             <p class="item-left">{{ day.weather[1] }}</p>
@@ -38,7 +38,7 @@
               {{ Math.round(day.temp.min) }}°c/{{ Math.round(day.temp.max) }}°c
             </p>
           </div>
-        </div> -->
+        </div>
       </div>
       <div v-else>
         <h1 class="error-message" id="errorMessage">
@@ -57,12 +57,13 @@ export default {
     geo_key: process.env.VUE_APP_WTF,
     api_base: "https://api.openweathermap.org/data/2.5/weather?q=",
     currentWeather: {},
+    forcastWeather: {},
     locationData: {},
   }),
   methods: {
     // fetching the weather data for the location the user put in the search bar
-    fetchWeatherData() {
-      this.fetchCurrentWeather();
+     fetchWeatherData() {
+       this.fetchCurrentWeather();
     },
     fetchCurrentWeather() {
       let query = document.getElementById('searchBar').value;
@@ -75,23 +76,31 @@ export default {
         .then(this.setCurrentWeatherData); // calling the function
     },
     fetchForcastWeather() {
-      if (this.locationData != "") {
+      if (this.locationData != 'undefined') {
         fetch(
-          `https://api.openweathermap.org/data/2.5/onecall?lat=${this.locationData.latitude}&lon=${this.locationData.longitude}&exclude=hourly,minutely,alerts&lang=de&units=metric&appid=${this.api_key}`
+          `https://api.openweathermap.org/data/2.5/onecall?lat=${this.locationData.lat}&lon=${this.locationData.lon}&exclude=hourly,minutely,alerts&lang=de&units=metric&appid=${this.api_key}`
         )
           .then((res) => {
             return res.json();
           })
-          .then(this.setWeatherData); // calling the function
+          .then(this.setForcastWeatherData); // calling the function
       } else {
         this.startingLocation();
       }
     },
     setCurrentWeatherData(results) {
       let searchBar = document.getElementById("searchBar");
-      this.currentWeather = results; // setting the value of the weather object to the date we get from the ap
+      this.currentWeather = results;
+      this.locationData = results.coord;
       searchBar.value = this.currentWeather.name ?? "";
       this.changeBGImage();
+      this.fetchForcastWeather();
+    },
+    setForcastWeatherData(results) {
+      this.forcastWeather = results;
+      this.forcastWeather.daily.splice(5, 7);
+      console.log(this.forcastWeather);
+      this.getDayOfTheWeek();
     },
     changeBGImage() {
       if (typeof this.currentWeather.main != "undefined") {
@@ -160,9 +169,9 @@ export default {
         .then(this.setWeatherData); // calling the function
     },
     getDayOfTheWeek() {
-      if (this.weatherData) {
+      if (this.forcastWeather) {
         let i = 0;
-        this.weatherData.daily.forEach((day) => {
+        this.forcastWeather.daily.forEach((day) => {
           let timestamp = day.dt;
           let a = new Date(timestamp * 1000);
           let days = [
@@ -176,9 +185,9 @@ export default {
           ];
           let dayOfWeek = days[a.getDay()];
           if (i == 0) {
-            this.weatherData.daily[i].weather.push("Heute");
+            this.forcastWeather.daily[i].weather.push("Heute");
           } else {
-            this.weatherData.daily[i].weather.push(dayOfWeek);
+            this.forcastWeather.daily[i].weather.push(dayOfWeek);
           }
           i += 1;
         });

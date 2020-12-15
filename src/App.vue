@@ -62,21 +62,25 @@ export default {
   }),
   methods: {
     // fetching the weather data for the location the user put in the search bar
-     fetchWeatherData() {
-       this.fetchCurrentWeather();
+    fetchWeatherData() {
+      this.fetchCurrentWeather();
     },
     fetchCurrentWeather() {
-      let query = document.getElementById('searchBar').value;
-      fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${ query }&lang=de&units=metric&appid=${this.api_key}`
-      )
-        .then((res) => {
-          return res.json();
-        })
-        .then(this.setCurrentWeatherData); // calling the function
+      let query = document.getElementById("searchBar").value;
+      if (query != "") {
+        fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${query}&lang=de&units=metric&appid=${this.api_key}`
+        )
+          .then((res) => {
+            return res.json();
+          })
+          .then(this.setCurrentWeatherData); // calling the function
+      } else {
+        this.startingLocation();
+      }
     },
     fetchForcastWeather() {
-      if (this.locationData != 'undefined') {
+      if (this.locationData != "undefined") {
         fetch(
           `https://api.openweathermap.org/data/2.5/onecall?lat=${this.locationData.lat}&lon=${this.locationData.lon}&exclude=hourly,minutely,alerts&lang=de&units=metric&appid=${this.api_key}`
         )
@@ -84,8 +88,6 @@ export default {
             return res.json();
           })
           .then(this.setForcastWeatherData); // calling the function
-      } else {
-        this.startingLocation();
       }
     },
     setCurrentWeatherData(results) {
@@ -99,7 +101,6 @@ export default {
     setForcastWeatherData(results) {
       this.forcastWeather = results;
       this.forcastWeather.daily.splice(5, 7);
-      console.log(this.forcastWeather);
       this.getDayOfTheWeek();
     },
     changeBGImage() {
@@ -161,12 +162,12 @@ export default {
     },
     startingWeather(position) {
       fetch(
-        `https://api.openweathermap.org/data/2.5/onecall?lat=${position.coords.latitude}&lon=${position.coords.longitude}&exclude=hourly,minutely,alerts&lang=de&units=metric&appid=${this.api_key}`
+        `https://api.openweathermap.org/data/2.5/weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}&lang=de&units=metric&appid=${this.api_key}`
       )
         .then((res) => {
           return res.json();
         })
-        .then(this.setWeatherData); // calling the function
+        .then(this.setCurrentWeatherData); // calling the function
     },
     getDayOfTheWeek() {
       if (this.forcastWeather) {

@@ -214,7 +214,9 @@ body {
 #app {
   background-image: url("./assets/default-bg.jpg");
   background-size: cover;
-  background-position: bottom;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   transition: ease-in-out 1.5s;
 }
 
@@ -231,7 +233,8 @@ body {
 }
 
 main {
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
   padding: 25px;
   background-image: linear-gradient(
     to bottom,
@@ -344,6 +347,12 @@ main {
   #app {
     max-width: 600px;
     margin: auto;
+    background-image: url("./assets/default-bg.jpg");
+    background-size: cover;
+    background-position: bottom;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    transition: ease-in-out 1.5s;
   }
   main {
     padding: 25px;

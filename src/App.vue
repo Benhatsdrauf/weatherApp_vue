@@ -155,8 +155,8 @@ export default {
       return `${day} ${date} ${month} ${year}`;
     },
     startingLocation() {
-      if (window.navigator.geolocation) {
-        window.navigator.geolocation.getCurrentPosition(this.startingWeather);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(this.startingWeather);
       }
     },
     startingWeather(position) {

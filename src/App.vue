@@ -54,7 +54,6 @@ export default {
   name: "App",
   data: () => ({
     api_key: process.env.VUE_APP_API_KEY,
-    geo_key: process.env.VUE_APP_WTF,
     api_base: "https://api.openweathermap.org/data/2.5/weather?q=",
     currentWeather: {},
     forcastWeather: {},
